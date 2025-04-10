@@ -50,18 +50,18 @@ const PuzzleGame = () => {
     if (isRunning && !isSolved && !timeUp) {
       const interval = setInterval(() => {
         setTimer((prev) => {
-          if (prev >= (difficulty === 'easy' ? 900 : difficulty === 'medium' ? 600 : 300)) {
+          if (prev >= 600) { // 10 minutes (600 seconds)
             setTimeUp(true);
             setIsRunning(false);
             playSound('error');
-            return prev;
+            return 600;
           }
           return prev + 1;
         });
       }, 1000);
       return () => clearInterval(interval);
     }
-  }, [isRunning, isSolved, timeUp, difficulty]);
+  }, [isRunning, isSolved, timeUp]);
 
   useEffect(() => {
     checkIfSolved();
@@ -264,7 +264,7 @@ const PuzzleGame = () => {
         <h1 className="text-4xl md:text-5xl font-bold text-white mb-2 bg-clip-text text-transparent bg-gradient-to-r from-yellow-300 via-pink-400 to-purple-400">
           🧩 NumLock Puzzle
         </h1>
-        <p className="text-lg text-purple-200">Slide the tiles to solve the puzzle!</p>
+        <p className="text-lg text-purple-200">Slide the tiles to solve the puzzle in 10 minutes!</p>
       </motion.div>
 
       {/* Header with action buttons */}
@@ -388,7 +388,7 @@ const PuzzleGame = () => {
               </li>
               <li className="flex items-start">
                 <span className="text-yellow-300 mr-2">•</span>
-                <span>Complete the puzzle before time runs out!</span>
+                <span>Complete the puzzle within 10 minutes!</span>
               </li>
             </ul>
           </motion.div>
@@ -472,7 +472,7 @@ const PuzzleGame = () => {
                   whileHover={{ scale: 1.05 }}
                   whileTap={{ scale: 0.95 }}
                 >
-                  🎉 Next Level
+                  {timer < 600 ? '🎉 Next Level' : '🔄 Try Again'}
                 </motion.button>
               )}
             </>
@@ -489,8 +489,14 @@ const PuzzleGame = () => {
             animate={{ scale: 1, opacity: 1 }}
             exit={{ scale: 0.5, opacity: 0 }}
           >
-            <h2 className="text-2xl font-bold mb-2">Level Complete! 🎉</h2>
-            <p className="text-lg">You solved it in {moves} moves!</p>
+            <h2 className="text-2xl font-bold mb-2">
+              {timer < 600 ? 'Great Job! 🎉' : 'Time Limit Exceeded! 😢'}
+            </h2>
+            <p className="text-lg">
+              {timer < 600 
+                ? `You solved it in ${moves} moves and ${formatTime(timer)}!`
+                : 'You solved the puzzle but exceeded the 10 minute limit!'}
+            </p>
           </motion.div>
         )}
 
@@ -502,7 +508,7 @@ const PuzzleGame = () => {
             exit={{ scale: 0.5, opacity: 0 }}
           >
             <h2 className="text-2xl font-bold mb-2">Time is Up! ⏰</h2>
-            <p className="text-lg">You can try again!</p>
+            <p className="text-lg">You did not solve the puzzle in 10 minutes!</p>
           </motion.div>
         )}
       </AnimatePresence>
