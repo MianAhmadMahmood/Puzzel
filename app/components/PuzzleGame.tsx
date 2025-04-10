@@ -19,6 +19,7 @@ const PuzzleGame = () => {
   const [showCelebration, setShowCelebration] = useState<boolean>(false);
   const [showSettings, setShowSettings] = useState<boolean>(false);
   const [showInfo, setShowInfo] = useState<boolean>(false);
+  const [gameStarted, setGameStarted] = useState<boolean>(false);
   const audioRef = useRef<HTMLAudioElement | null>(null);
 
   // Sound effects
@@ -66,7 +67,10 @@ const PuzzleGame = () => {
     checkIfSolved();
   }, [tiles]);
 
-  const initGame = (): void => {
+  const initGame = (resetLevel: boolean = false): void => {
+    if (resetLevel) {
+      setLevel(1);
+    }
     const size = difficulty === 'easy' ? 3 : difficulty === 'medium' ? 4 : 5;
     const totalTiles = size * size - 1;
     const numbers = Array.from({ length: totalTiles }, (_, i) => i + 1);
@@ -92,7 +96,12 @@ const PuzzleGame = () => {
     setTimer(0);
     setTimeUp(false);
     setIsRunning(true);
+    setGameStarted(true);
     setShowCelebration(false);
+  };
+
+  const resetGame = () => {
+    initGame(true);
   };
 
   const countInversions = (arr: number[]): number => {
@@ -106,7 +115,7 @@ const PuzzleGame = () => {
   };
 
   const handleTileClick = (index: number) => {
-    if (isSolved || tiles[index] === null || timeUp) return;
+    if (!gameStarted || isSolved || tiles[index] === null || timeUp) return;
 
     const emptyIndex = tiles.indexOf(null);
     const size = difficulty === 'easy' ? 3 : difficulty === 'medium' ? 4 : 5;
@@ -253,7 +262,7 @@ const PuzzleGame = () => {
         className="relative z-10 text-center mb-8"
       >
         <h1 className="text-4xl md:text-5xl font-bold text-white mb-2 bg-clip-text text-transparent bg-gradient-to-r from-yellow-300 via-pink-400 to-purple-400">
-        🧩 NumLock Puzzle
+          🧩 NumLock Puzzle
         </h1>
         <p className="text-lg text-purple-200">Slide the tiles to solve the puzzle!</p>
       </motion.div>
@@ -437,24 +446,36 @@ const PuzzleGame = () => {
         </div>
 
         <div className="flex flex-wrap justify-center gap-3 mb-4">
-          <motion.button
-            className="px-4 py-2 rounded-xl font-semibold bg-gradient-to-r from-amber-400 to-amber-500 text-black shadow-lg"
-            onClick={initGame}
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
-          >
-            🔁 Restart
-          </motion.button>
-
-          {isSolved && !timeUp && (
+          {!gameStarted ? (
             <motion.button
-              className="px-4 py-2 rounded-xl font-semibold bg-gradient-to-r from-green-400 to-green-500 text-white shadow-lg"
-              onClick={handleNextLevel}
+              className="px-6 py-3 rounded-xl font-semibold bg-gradient-to-r from-green-400 to-green-500 text-white shadow-lg"
+              onClick={() => initGame()}
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
             >
-              🎉 Next Level
+              🚀 Start Game
             </motion.button>
+          ) : (
+            <>
+              <motion.button
+                className="px-6 py-3 rounded-xl font-semibold bg-gradient-to-r from-amber-400 to-amber-500 text-black shadow-lg"
+                onClick={resetGame}
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+              >
+                🔄 Reset Game
+              </motion.button>
+              {isSolved && !timeUp && (
+                <motion.button
+                  className="px-6 py-3 rounded-xl font-semibold bg-gradient-to-r from-green-400 to-green-500 text-white shadow-lg"
+                  onClick={handleNextLevel}
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                >
+                  🎉 Next Level
+                </motion.button>
+              )}
+            </>
           )}
         </div>
       </div>
